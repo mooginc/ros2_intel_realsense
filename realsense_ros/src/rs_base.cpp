@@ -22,7 +22,8 @@ using namespace std::chrono_literals;
 RealSenseBase::RealSenseBase(rs2::context ctx, rs2::device dev, rclcpp::Node & node)
 : node_(node),
   ctx_(ctx),
-  dev_(dev)
+  dev_(dev),
+  default_camera_name_("camera")
 {
   // Publish static transforms
   if (node_.has_parameter("base_frame_id")) {
@@ -31,7 +32,6 @@ RealSenseBase::RealSenseBase(rs2::context ctx, rs2::device dev, rclcpp::Node & n
     base_frame_id_ = node_.declare_parameter("base_frame_id", DEFAULT_BASE_FRAME_ID);
   }
   // Assign camera name based on input base frame
-  default_camera_name_ = "camera";
   std::string underscore = "_";
   // Get index of underscore after camera name ex: camera_link or realsense_link
   auto ind_underscore = base_frame_id_.find(underscore);

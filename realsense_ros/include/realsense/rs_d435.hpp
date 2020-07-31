@@ -48,6 +48,27 @@ protected:
   rs2::pointcloud pc_;
   rs2::points points_;
 
+  // Frame names
+  std::string depth_frame_id_;
+  std::string infra1_frame_id_;
+  std::string infra2_frame_id_;
+  std::string color_frame_id_;
+  std::string fisheye1_frame_id_;
+  std::string fisheye2_frame_id_;
+  std::string pose_frame_id_;
+  
+  std::string depth_optical_frame_id_;
+  std::string infra1_optical_frame_id_;
+  std::string infra2_optical_frame_id_;
+  std::string color_optical_frame_id_;
+  std::string fisheye1_optical_frame_id_;
+  std::string fisheye2_optical_frame_id_;
+  std::string accel_optical_frame_id_;
+  std::string gyro_optical_frame_id_;
+  std::string pose_optical_frame_id_;
+  
+  std::string aligned_depth_to_color_frame_id_;
+
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr aligned_depth_image_pub_;
   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr aligned_depth_info_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pointcloud_pub_;
