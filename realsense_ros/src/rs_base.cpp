@@ -30,6 +30,18 @@ RealSenseBase::RealSenseBase(rs2::context ctx, rs2::device dev, rclcpp::Node & n
   } else {
     base_frame_id_ = node_.declare_parameter("base_frame_id", DEFAULT_BASE_FRAME_ID);
   }
+  // Assign camera name based on input base frame
+  default_camera_name_ = "camera";
+  std::string underscore = "_";
+  // Get index of underscore after camera name ex: camera_link or realsense_link
+  auto ind_underscore = base_frame_id_.find(underscore);
+  if (ind_underscore != std::string::npos){
+    camera_name_ = base_frame_id_.substr(0, ind_underscore);
+  }
+  else{
+    // leave as default
+    camera_name_ = default_camera_name_;
+  }
   pipeline_ = rs2::pipeline(ctx_);
   static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_);
   node_.set_on_parameters_set_callback(std::bind(&RealSenseBase::paramChangeCallback, this, std::placeholders::_1));
@@ -177,7 +189,7 @@ void RealSenseBase::publishImageTopic(const rs2::frame & frame, const rclcpp::Ti
     //debug
     //RCLCPP_INFO(node_.get_logger(), "non-intra: timestamp: %f, address: %p", time.seconds(), reinterpret_cast<std::uintptr_t>(img.get()));
     //
-    img->header.frame_id = OPTICAL_FRAME_ID.at(type_index);
+    img->header.frame_id = replaceCameraName(OPTICAL_FRAME_ID.at(type_index));
     img->header.stamp = time;
     image_pub_[type_index]->publish(*img);
   } else {
@@ -201,7 +213,7 @@ void RealSenseBase::updateVideoStreamCalibData(const rs2::video_stream_profile &
   auto intrinsic = video_profile.get_intrinsics();
   camera_info_[type_index].width = intrinsic.width;
   camera_info_[type_index].height = intrinsic.height;
-  camera_info_[type_index].header.frame_id = OPTICAL_FRAME_ID.at(type_index);
+  camera_info_[type_index].header.frame_id = replaceCameraName(OPTICAL_FRAME_ID.at(type_index));
 
   camera_info_[type_index].k.at(0) = intrinsic.fx;
   camera_info_[type_index].k.at(2) = intrinsic.ppx;
@@ -279,9 +291,9 @@ void RealSenseBase::calculateTFAndPublish(const rs2::stream_profile & stream_in,
   auto type_index = std::pair<rs2_stream, int>(type, index);
   if (type == RS2_STREAM_POSE) {
     Q = Q.inverse();
-    composeTFMsgAndPublish(transform_ts, translation, Q, OPTICAL_FRAME_ID.at(type_index), base_frame_id_);
+    composeTFMsgAndPublish(transform_ts, translation, Q, replaceCameraName(OPTICAL_FRAME_ID.at(type_index)), base_frame_id_);
   } else {
-    composeTFMsgAndPublish(transform_ts, translation, quaternion_optical, base_frame_id_, OPTICAL_FRAME_ID.at(type_index));
+    composeTFMsgAndPublish(transform_ts, translation, quaternion_optical, base_frame_id_, replaceCameraName(OPTICAL_FRAME_ID.at(type_index)));
   }
 }
 
@@ -457,4 +469,20 @@ Result RealSenseBase::changeFPS(const stream_index_pair & stream, const rclcpp::
   }
   return result;
 }
+
+std::string RealSenseBase::replaceCameraName(const std::string& inString){
+  // If camera name is default camera name, do not search
+  if (camera_name_ == default_camera_name_){
+    return inString;
+  }
+  // Find default camera name in string
+  std::string outString = inString;
+  auto ind_default_camera_name = outString.find(default_camera_name_);
+  if (ind_default_camera_name != std::string::npos){
+    outString = outString.replace(ind_default_camera_name, ind_default_camera_name + default_camera_name_.length(), camera_name_);
+  }
+
+  return outString;
+}
+
 }  // namespace realsense

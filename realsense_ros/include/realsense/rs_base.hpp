@@ -81,6 +81,8 @@ protected:
   Result changeResolution(const stream_index_pair & stream, const rclcpp::Parameter & param);
   Result changeFPS(const stream_index_pair & stream, const rclcpp::Parameter & param);
 
+  std::string replaceCameraName(const std::string& inString);
+
   typedef struct VideoStreamInfo
   {
     //rs2_format format;
@@ -100,6 +102,8 @@ protected:
   rs2::pipeline pipeline_;
   rs2::config cfg_;
   std::string base_frame_id_;
+  std::string default_camera_name_;
+  std::string camera_name_;
   rs2::frame_queue frame_data;
   std::thread work_thread_;
   std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
