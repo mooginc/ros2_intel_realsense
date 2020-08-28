@@ -43,7 +43,13 @@ RealSenseBase::RealSenseBase(rs2::context ctx, rs2::device dev, rclcpp::Node & n
     camera_name_ = default_camera_name_;
   }
   pipeline_ = rs2::pipeline(ctx_);
-  static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_);
+  
+  auto tf_qos = tf2_ros::StaticBroadcasterQoS();
+  if (node.get_node_options().use_intra_process_comms()) {
+    tf_qos.durability_volatile();
+  }
+
+  static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_, tf_qos);
   node_.set_on_parameters_set_callback(std::bind(&RealSenseBase::paramChangeCallback, this, std::placeholders::_1));
 }
 
@@ -198,7 +204,7 @@ void RealSenseBase::publishImageTopic(const rs2::frame & frame, const rclcpp::Ti
     //debug
     //RCLCPP_INFO(node_.get_logger(), "intra: timestamp: %f, address: %p", time.seconds(), reinterpret_cast<std::uintptr_t>(img.get()));
     //
-    img->header.frame_id = OPTICAL_FRAME_ID.at(type_index);
+    img->header.frame_id = replaceCameraName(OPTICAL_FRAME_ID.at(type_index));
     img->header.stamp = time;
     image_pub_[type_index]->publish(std::move(img));
   }
