@@ -55,6 +55,17 @@ RealSenseD435::RealSenseD435(rs2::context ctx, rs2::device dev, rclcpp::Node & n
     dense_pc_ = node_.declare_parameter("dense_pointcloud", DENSE_PC);
   }
 
+  if (node_.has_parameter("enable_hole_filling")){
+    node_.get_parameter("enable_hole_filling", enable_hole_filling_);
+  }
+  else {
+    enable_hole_filling_ = node_.declare_parameter("enable_hole_filling", ENABLE_HOLE_FILLING);
+  }
+
+  if (enable_hole_filling_){
+    // optionally, configure the filter (using default settings now)
+  }
+
   // Initialize frame names
   depth_frame_id_ = replaceCameraName(DEFAULT_DEPTH_FRAME_ID);
   infra1_frame_id_ = replaceCameraName(DEFAULT_INFRA1_FRAME_ID);
@@ -89,6 +100,9 @@ void RealSenseD435::publishTopicsCallback(const rs2::frame & frame)
   }
   if (enable_[DEPTH] && (image_pub_[DEPTH]->get_subscription_count() > 0 || camera_info_pub_[DEPTH]->get_subscription_count() > 0)) {
     auto frame = frameset.get_depth_frame();
+    if (enable_hole_filling_){
+      frame = hole_filling_filter_.process(frame);
+    }
     publishImageTopic(frame, t);
   }
   if (enable_[INFRA1] && (image_pub_[INFRA1]->get_subscription_count() > 0 || camera_info_pub_[INFRA1]->get_subscription_count() > 0)) {
@@ -104,6 +118,9 @@ void RealSenseD435::publishTopicsCallback(const rs2::frame & frame)
        aligned_depth_info_pub_->get_subscription_count() > 0))) {
     auto aligned_frameset = align_to_color_.process(frameset);
     auto depth = aligned_frameset.get_depth_frame();
+    if (enable_hole_filling_){
+      depth = hole_filling_filter_.process(depth);
+    }
     if (aligned_depth_image_pub_->get_subscription_count() > 0 || aligned_depth_info_pub_->get_subscription_count() > 0) {
       publishAlignedDepthTopic(depth, t);
     }
