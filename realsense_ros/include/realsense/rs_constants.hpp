@@ -39,6 +39,7 @@ namespace realsense
   const bool ALIGN_DEPTH = true;
   const bool ENABLE_POINTCLOUD = true;
   const bool DENSE_PC = true;
+  const bool ENABLE_HOLE_FILLING = false;
   const bool DEFAULT_ENABLE_STREAM = true;
 
   const std::vector<int> DEFAULT_IMAGE_RESOLUTION = {640, 480};

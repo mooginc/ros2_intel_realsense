@@ -44,6 +44,8 @@ protected:
   bool enable_pointcloud_;
   bool dense_pc_;
   bool initialized_ = false;
+  bool enable_hole_filling_;
+  rs2::hole_filling_filter hole_filling_filter_;
   rs2::align align_to_color_ = rs2::align(RS2_STREAM_COLOR);
   rs2::pointcloud pc_;
   rs2::points points_;
