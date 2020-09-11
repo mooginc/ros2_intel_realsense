@@ -31,8 +31,11 @@ RealSenseBase::RealSenseBase(rs2::context ctx, rs2::device dev, rclcpp::Node & n
   } else {
     base_frame_id_ = node_.declare_parameter("base_frame_id", DEFAULT_BASE_FRAME_ID);
   }
+  // Patch for two camera launch problem: 
+  // https://github.com/intel/ros2_intel_realsense/pull/115/commits/1d39aed6b81740b5820879beaf284f8acf8d53c0
   auto sn = dev_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
   cfg_.enable_device(sn);
+  
   // Assign camera name based on input base frame
   std::string underscore = "_";
   // Get index of underscore after camera name ex: camera_link or realsense_link
