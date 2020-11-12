@@ -30,7 +30,7 @@ from launch_ros.descriptions import ComposableNode
 def generate_launch_description():
     # config the serial number and base frame id of each camer
     rgbd_base_frame_id = LaunchConfiguration('base_frame_id', default='d435_link')
-    rgbd_serial_no = LaunchConfiguration('serial_no', default='819312071869')
+    rgbd_serial_no = LaunchConfiguration('serial_no', default='"819312071869"')
 
     tf_node = Node(
             package='tf2_ros',

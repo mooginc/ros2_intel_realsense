@@ -32,9 +32,9 @@ def generate_launch_description():
     camera1_base_frame_id = LaunchConfiguration('base_frame_id', default='camera1_link')
     camera2_base_frame_id = LaunchConfiguration('base_frame_id', default='camera2_link')
     camera3_base_frame_id = LaunchConfiguration('base_frame_id', default='camera3_link')
-    camera1_serial_no = LaunchConfiguration('serial_no', default='837212070294')
-    camera2_serial_no = LaunchConfiguration('serial_no', default='819312071869')
-    camera3_serial_no = LaunchConfiguration('serial_no', default='845412111144')
+    camera1_serial_no = LaunchConfiguration('serial_no', default='"837212070294"')
+    camera2_serial_no = LaunchConfiguration('serial_no', default='"819312071869"')
+    camera3_serial_no = LaunchConfiguration('serial_no', default='"845412111144"')
 
 
     camera1_node = Node(
