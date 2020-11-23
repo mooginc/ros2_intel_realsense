@@ -43,6 +43,10 @@ void RealSenseNodeFactory::init()
   declare_parameter("serial_no", "");
   get_parameter("serial_no", serial_no_);
 
+  int startDelayMS = 0;
+  declare_parameter("start_delay_ms", 0);
+  get_parameter("start_delay_ms", startDelayMS);
+
   if (serial_no_.empty()) {
     RCLCPP_INFO(this->get_logger(), "Device's serial number is not set, enabling the default device!");
   }
@@ -50,7 +54,12 @@ void RealSenseNodeFactory::init()
     query_thread_ = std::thread([=]()
               {
                 std::chrono::milliseconds TIMESPAN(600);
+                std::chrono::milliseconds START_DELAY(startDelayMS);
+
                 while (!dev_) {
+                  // multiple camera setup: need to stagger camera initialization
+                  std::this_thread::sleep_for(START_DELAY);
+
                   auto dev_lst = ctx_.query_devices();
                   getDevice(dev_lst);
                   if (dev_) {
